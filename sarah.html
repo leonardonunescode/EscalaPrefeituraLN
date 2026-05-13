@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Minha Escala — Sarah</title>
+<style>
+  :root {
+    --bg:#0e0e0e; --bg2:#161616; --bg3:#1e1e1e;
+    --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.13);
+    --text:#f0f0f0; --text2:#888; --text3:#4a4a4a;
+    --accent:#0071E3;
+    --accent-bg:rgba(0,113,227,0.13);
+    --accent-dim:rgba(0,113,227,0.07);
+    --amber:#EF9F27; --amber-bg:rgba(239,159,39,0.13);
+    --red:#E24B4A; --red-bg:rgba(226,75,74,0.13);
+    --blue:#378ADD; --blue-bg:rgba(55,138,221,0.13);
+    --green:#1D9E75;
+    --radius:12px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;min-height:100vh;}
+  body{padding-bottom:60px;}
+
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(14,14,14,0.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:0.5px solid var(--border);padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .logo-box{width:34px;height:34px;background:var(--accent);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;}
+  .logo-box span{color:#fff;font-size:12px;font-weight:700;letter-spacing:1px;}
+  .brand{font-size:15px;font-weight:500;letter-spacing:1px;}
+  .brand-sub{font-size:10px;color:var(--text2);letter-spacing:2px;margin-top:2px;}
+  .topbar-right{text-align:right;}
+  .today-badge{font-size:11px;color:var(--text2);line-height:1.6;}
+  .working-today{font-size:11px;font-weight:600;color:var(--accent);margin-top:2px;}
+  .free-today{font-size:11px;color:var(--text3);margin-top:2px;}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px 0;}
+  .stat{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;}
+  .stat-n{font-size:22px;font-weight:600;color:var(--accent);}
+  .stat-l{font-size:10px;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
+
+  .next-wrap{padding:14px 16px 0;}
+  .next-card{background:var(--accent-bg);border:0.5px solid var(--accent);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;}
+  .next-label{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:4px;}
+  .next-date{font-size:16px;font-weight:600;color:var(--text);}
+  .next-day{font-size:12px;color:var(--text2);margin-top:2px;}
+  .next-count{margin-left:auto;text-align:right;font-size:11px;color:var(--accent);font-weight:600;}
+
+  .filters{display:flex;gap:6px;padding:14px 16px 0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .filters::-webkit-scrollbar{display:none;}
+  .fbtn{white-space:nowrap;font-size:11px;padding:5px 13px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;-webkit-user-select:none;user-select:none;transition:all .15s;}
+  .fbtn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  .content{padding:16px 16px 0;}
+  .month-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;margin-top:20px;}
+  .month-header:first-child{margin-top:0;}
+  .month-title{font-size:10px;font-weight:600;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+  .month-count{font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:10px;}
+  .month-line{flex:1;height:0.5px;background:var(--border);}
+
+  .day-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:6px;display:flex;align-items:center;gap:14px;}
+  .day-card.is-today{border-color:var(--accent);background:var(--accent-dim);}
+
+  .day-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot-fds{background:var(--accent);}
+  .dot-noturno{background:var(--blue);}
+  .dot-sexta{background:var(--amber);}
+  .dot-feriado{background:var(--red);}
+
+  .day-info{flex:1;min-width:0;}
+  .day-date{font-size:15px;font-weight:500;color:var(--text);}
+  .day-weekday{font-size:12px;color:var(--text2);margin-top:2px;}
+  .day-obs{font-size:11px;color:var(--text3);margin-top:3px;}
+
+  .day-badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;}
+  .badge-fds{background:var(--accent-bg);color:var(--accent);}
+  .badge-noturno{background:var(--blue-bg);color:var(--blue);}
+  .badge-sexta{background:var(--amber-bg);color:var(--amber);}
+  .badge-feriado{background:var(--red-bg);color:var(--red);}
+
+  .today-tag{font-size:10px;background:var(--accent);color:#fff;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:600;}
+  .empty{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:13px;}
+
+  .credit{text-align:center;padding:24px 16px 0;font-size:11px;color:var(--text3);}
+  .credit span{color:var(--text2);}
+
+  @media(min-width:600px){
+    body{max-width:640px;margin:0 auto;}
+    .topbar,.stats,.filters,.content,.next-wrap{padding-left:24px;padding-right:24px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-box"><span>EQ1</span></div>
+    <div><div class="brand">Minha Escala</div><div class="brand-sub">Sarah · Eq 01 · D1</div></div>
+  </div>
+  <div class="topbar-right">
+    <div class="today-badge" id="top-date"></div>
+    <div id="top-status"></div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">Dias totais</div></div>
+  <div class="stat"><div class="stat-n" id="s-fds">0</div><div class="stat-l">Fins de semana</div></div>
+  <div class="stat"><div class="stat-n" id="s-noturno">0</div><div class="stat-l">Noturnos</div></div>
+</div>
+
+<div class="next-wrap" id="next-wrap"></div>
+
+<div class="filters" id="filters">
+  <button class="fbtn active" data-f="all">Todos</button>
+  <button class="fbtn" data-f="fds">Fim de semana</button>
+  <button class="fbtn" data-f="noturno">Noturno</button>
+  <button class="fbtn" data-f="sexta">Sexta</button>
+  <button class="fbtn" data-f="feriado">Feriado</button>
+</div>
+
+<div class="content" id="board"></div>
+
+<div class="credit">Feito com 💙 pelo <span>Leonardo — LN Audiovisual</span></div>
+
+<script>
+const DIAS = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
+const MESES = ["","Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+const DIAS_SARAH = [
+  {d:"2026-04-30",tipo:"noturno",obs:""},
+  {d:"2026-05-06",tipo:"noturno",obs:""},
+  {d:"2026-05-12",tipo:"noturno",obs:""},
+  {d:"2026-05-18",tipo:"noturno",obs:""},
+  {d:"2026-05-22",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-05-23",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-05-24",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-05-28",tipo:"noturno",obs:""},
+  {d:"2026-06-03",tipo:"noturno",obs:""},
+  {d:"2026-06-09",tipo:"noturno",obs:""},
+  {d:"2026-06-15",tipo:"noturno",obs:""},
+  {d:"2026-06-19",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-06-20",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-06-21",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-06-25",tipo:"noturno",obs:""},
+  {d:"2026-07-01",tipo:"noturno",obs:""},
+  {d:"2026-07-07",tipo:"noturno",obs:""},
+  {d:"2026-07-13",tipo:"noturno",obs:""},
+  {d:"2026-07-17",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-07-18",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-07-19",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-07-23",tipo:"noturno",obs:""},
+  {d:"2026-07-29",tipo:"noturno",obs:""},
+  {d:"2026-08-04",tipo:"noturno",obs:""},
+  {d:"2026-08-10",tipo:"noturno",obs:""},
+  {d:"2026-08-14",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-08-15",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-08-16",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-08-20",tipo:"noturno",obs:""},
+  {d:"2026-08-26",tipo:"noturno",obs:""},
+  {d:"2026-09-01",tipo:"noturno",obs:""},
+  {d:"2026-09-07",tipo:"feriado",obs:"07/09 — fora de cobertura"},
+  {d:"2026-09-11",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-09-12",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-09-13",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-09-17",tipo:"noturno",obs:""},
+  {d:"2026-09-23",tipo:"noturno",obs:""},
+  {d:"2026-09-29",tipo:"noturno",obs:""},
+  {d:"2026-10-05",tipo:"noturno",obs:""},
+  {d:"2026-10-09",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-10-10",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-10-11",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-10-15",tipo:"noturno",obs:""},
+  {d:"2026-10-21",tipo:"noturno",obs:""},
+  {d:"2026-10-27",tipo:"noturno",obs:""},
+  {d:"2026-11-02",tipo:"feriado",obs:"Finados — Cobre também 02/11"},
+  {d:"2026-11-06",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-11-07",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-11-08",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-11-12",tipo:"noturno",obs:""},
+  {d:"2026-11-18",tipo:"noturno",obs:""},
+  {d:"2026-11-24",tipo:"noturno",obs:""},
+  {d:"2026-11-30",tipo:"noturno",obs:""},
+  {d:"2026-12-04",tipo:"sexta",obs:"Toda Equipe 01"},
+  {d:"2026-12-05",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-12-06",tipo:"fds",obs:"Fim de semana Eq 01"},
+  {d:"2026-12-10",tipo:"noturno",obs:""},
+  {d:"2026-12-16",tipo:"noturno",obs:""},
+  {d:"2026-12-22",tipo:"noturno",obs:""},
+];
+
+const TIPO_LABEL = {
+  fds:"Fim de semana",
+  noturno:"Noturno D1",
+  sexta:"Sexta — EQ01",
+  feriado:"Feriado ⭐"
+};
+
+let filtro = "all";
+
+function parseDate(str) { const [y,m,d]=str.split("-").map(Number); return new Date(y,m-1,d); }
+function formatDate(str) { const d=parseDate(str); return d.getDate().toString().padStart(2,"0")+"/"+(d.getMonth()+1).toString().padStart(2,"0"); }
+function isTodayStr(str) { const now=new Date(),d=parseDate(str); return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&d.getDate()===now.getDate(); }
+function isPast(str) { const now=new Date(); now.setHours(0,0,0,0); return parseDate(str)<now; }
+
+function updateTopbar() {
+  const now = new Date();
+  document.getElementById("top-date").textContent = now.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
+  const todayWork = DIAS_SARAH.find(d => isTodayStr(d.d));
+  const statusEl = document.getElementById("top-status");
+  statusEl.innerHTML = todayWork
+    ? `<div class="working-today">● Você trabalha hoje</div>`
+    : `<div class="free-today">Folga hoje</div>`;
+}
+
+function updateStats() {
+  document.getElementById("s-total").textContent = DIAS_SARAH.length;
+  document.getElementById("s-fds").textContent = DIAS_SARAH.filter(d=>d.tipo==="fds").length;
+  document.getElementById("s-noturno").textContent = DIAS_SARAH.filter(d=>d.tipo==="noturno").length;
+}
+
+function updateNextDay() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const next = DIAS_SARAH.find(d => parseDate(d.d) >= now && !isTodayStr(d.d));
+  const wrap = document.getElementById("next-wrap");
+  if (!next) { wrap.innerHTML=""; return; }
+  const nd = parseDate(next.d);
+  const diff = Math.round((nd - now) / 864e5);
+  const diffTxt = diff===1?"amanhã":`em ${diff} dias`;
+  wrap.innerHTML = `<div class="next-card">
+    <div>
+      <div class="next-label">Próximo dia de trabalho</div>
+      <div class="next-date">${formatDate(next.d)} — ${DIAS[nd.getDay()]}</div>
+      <div class="next-day">${TIPO_LABEL[next.tipo]}${next.obs?" · "+next.obs:""}</div>
+    </div>
+    <div class="next-count">${diffTxt}</div>
+  </div>`;
+}
+
+function render() {
+  const visible = filtro==="all" ? DIAS_SARAH : DIAS_SARAH.filter(d=>d.tipo===filtro);
+  const groups = {};
+  visible.forEach(d => {
+    const dt = parseDate(d.d);
+    const key = dt.getFullYear()+"-"+(dt.getMonth()+1).toString().padStart(2,"0");
+    const label = MESES[dt.getMonth()+1]+" "+dt.getFullYear();
+    if (!groups[key]) groups[key]={label,items:[]};
+    groups[key].items.push(d);
+  });
+
+  let html = "";
+  Object.keys(groups).sort().forEach(key => {
+    const g = groups[key];
+    html += `<div class="month-header"><span class="month-title">${g.label}</span><span class="month-count">${g.items.length}</span><div class="month-line"></div></div>`;
+    g.items.forEach(d => {
+      const dt = parseDate(d.d);
+      const isToday = isTodayStr(d.d);
+      const past = isPast(d.d);
+      html += `<div class="day-card${isToday?" is-today":""}" style="${past&&!isToday?"opacity:.4":""}">
+        <div class="day-dot dot-${d.tipo}"></div>
+        <div class="day-info">
+          <div class="day-date">${formatDate(d.d)}${isToday?'<span class="today-tag">HOJE</span>':""}</div>
+          <div class="day-weekday">${DIAS[dt.getDay()]}</div>
+          ${d.obs?`<div class="day-obs">${d.obs}</div>`:""}
+        </div>
+        <span class="day-badge badge-${d.tipo}">${TIPO_LABEL[d.tipo]}</span>
+      </div>`;
+    });
+  });
+
+  document.getElementById("board").innerHTML = html || '<div class="empty">Nenhum dia nesse filtro.</div>';
+}
+
+document.getElementById("filters").addEventListener("click", e => {
+  const btn = e.target.closest(".fbtn"); if(!btn) return;
+  filtro = btn.dataset.f;
+  document.querySelectorAll(".fbtn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active"); render();
+});
+
+updateTopbar(); updateStats(); updateNextDay(); render();
+</script>
+</body>
+</html>
